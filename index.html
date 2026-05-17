@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple JSON Viewer</title>
+    <style>
+        body {
+            font-family: monospace;
+            font-size: 16px;
+            padding: 30px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        #json-viewer {
+            background-color: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+            min-width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Container for child elements, hidden by default */
+        .children {
+            display: none;
+            margin-left: 12px;
+            border-left: 1px dashed #555;
+            padding-left: 8px;
+        }
+
+        /* Toggle class to show children */
+        .children.expanded {
+            display: block;
+        }
+
+        /* Expandable nodes (Keys) */
+        .expandable {
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 0;
+            color: #9cdcfe;
+            /* Light blue for keys */
+        }
+
+        .expandable:hover {
+            color: #fff;
+        }
+
+        /* The right-facing arrow for collapsed items */
+        .expandable::before {
+            content: '▶';
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            transition: transform 0.1s;
+        }
+
+        /* The down-facing arrow for expanded items */
+        .expandable.open::before {
+            content: '▼';
+        }
+
+        /* Non-expandable items (Values) */
+        .leaf {
+            padding: 4px 0;
+            color: #ce9178;
+            /* Orange for string values */
+        }
+
+        /* Bullet point for non-expandable items to align with arrows */
+        .leaf::before {
+            content: '•';
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="json-viewer"></div>
+
+    <script>
+        // The exact JSON structure from your example
+        const jsonData = {
+            "Business Modeling Process": [
+                "Business ideas",
+                {
+                    "Idea assessment": {
+                        "key questions addressing": [
+                            "Customers",
+                            "Offering",
+                            "Value proposition",
+                            "Core competencies",
+                            "People"
+                        ]
+                    }
+                },
+                {
+                    "Feasibility analysis": {
+                        "Elements": [
+                            {
+                                "Industry and Market Feasibility": {
+                                    "Ask": [
+                                        "How large is the industry?",
+                                        "How fast is it growing?",
+                                        "Is the industry as a whole profitable",
+                                        "Is the industry characterized by high profit margins or razor-thin margins?",
+                                        "How essential are its products or services to customers?",
+                                        "What trends are shaping the industry's future?",
+                                        "What threats does the industry face?",
+                                        "What opportunities does the industry face?",
+                                        "How crowded is the industry?",
+                                        "How intense is the level of competition in the industry?",
+                                        "Is the industry young, mature or somewhere in between?"
+                                    ],
+                                    "Porter's Five Forces": [
+                                        {
+                                            "Rivalry among companies": [
+                                                "Number of competitors is large, or, at the other extreme, quite small",
+                                                "Competitors are not similar in size or capacity",
+                                                "Industry is growing fast",
+                                                "Opportunity to sell a differentiated product or service exists"
+                                            ]
+                                        },
+                                        {
+                                            "Bargaining power of suppliers": [
+                                                "Many suppliers sell a commodity product",
+                                                "Substitutes are available",
+                                                "Switching costs are low",
+                                                "Items account for a small portion of the cost of finished products"
+                                            ]
+                                        },
+                                        {
+                                            "Bargaining power of buyers": [
+                                                "Customers’ switching costs are high",
+                                                "Number of buyers is large",
+                                                "Customers want differentiated products",
+                                                "Customers find it difficult to collect information for comparing suppliers",
+                                                "Items account for a small portion of customers’ finished products"
+                                            ]
+                                        },
+                                        {
+                                            "Threat of new entrants": [
+                                                "Advantages of economies of scale are absent",
+                                                "Capital requirements to enter are low",
+                                                "Cost advantages are not related to company size",
+                                                "Buyers are not loyal to existing brands",
+                                                "Government does not restrict the entrance of new companies"
+                                            ]
+                                        },
+                                        {
+                                            "Threat of substitute products or services": [
+                                                "Quality substitutes are not readily available",
+                                                "Prices of substitute products are not significantly lower than those of the industry’s products",
+                                                "Buyers’ switching costs are high"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Product or Service Feasibility": {
+                                    "Ask": [
+                                        "Are customers willing to purchase our product or service?",
+                                        "Can we provide the product or service to customers at a profit?"
+                                    ],
+                                    "Researches": [
+                                        {
+                                            "Primary": [
+                                                "Customer surveys and questionnaires",
+                                                "Focus groups",
+                                                "Prototypes",
+                                                "In-home trials",
+                                                "Windshield research"
+                                            ]
+                                        },
+                                        {
+                                            "Secondary": [
+                                                "Trade associations and business directories",
+                                                "Industry databases",
+                                                "Demographic data",
+                                                "Census data",
+                                                "Forecasts",
+                                                "Market research",
+                                                "Articles",
+                                                "Local data",
+                                                "Internet"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Financial Feasibility": {
+                                    "Metrics": [
+                                        {"Capital requirements": "an estimate of how much start-up capital is required to launch the business"},
+                                        {"Estimated earnings": "forecasted income statements"},
+                                        {"Time out of cash": "the total cash it will take to sustain the business until the business achieves break-even cash flow"},
+                                        {"Return on investment": "combining the previous two estimates to determine how much investors can expect their investments to return"}
+                                    ]
+                                }
+                            },
+                            {
+                                "Entrepreneur/Team Feasibility": [
+                                    "Is this idea right for me?",
+                                    "Assess entrepreneurial readiness: knowledge, experience, and skills necessary for entrepreneurs to be successful",
+                                    "Assess whether the business will be able to generate enough profit to support everyone’s income needs"
+                                ]
+                            }
+                        ],
+                        "Macro forces": [
+                            "Global",
+                            "Sociocultural",
+                            "Demographic",
+                            "Economic",
+                            "Political and legal",
+                            "Technological"
+                        ]
+                    }
+                },
+                {
+                    "Business model": {
+                        "Key questions": [
+                            "What value does the business offer customers?",
+                            "Who is my target market?",
+                            "What do they expect of me as my customers?",
+                            "How do I get information to them, and how do they want to get the product?",
+                            "What are the key activities to make all this come together, and what will they cost?",
+                            "What resources do I need to make this happen, including money?",
+                            "Who are the key partners I will need to attract to be successful?"
+                        ],
+                        "Phases": [
+                            {
+                                "Develop the business model canvas": [
+                                    "Key partners",
+                                    "Key activities",
+                                    "Key resources",
+                                    "Value proposition",
+                                    "Customer relationship",
+                                    "Channel",
+                                    "Customer segments",
+                                    "Cost structure",
+                                    "Revenue streams"
+                                ]
+                            },
+                            {
+                                "Test the value proposition with customers": [
+                                    "Do we really understand the customer problem the business model is trying to address?",
+                                    "Do these customers care enough about this problem to spend their hard-earned money on our product?",
+                                    "Do these customers care enough about our product to help us by telling others through word-of-mouth?"
+                                ]
+                            },
+                            {
+                                "Test the product with prototype or minimal viable product": [
+                                    {"test early version with a lean start-up": "a process of rapidly developing simple prototypes to test key assumptions by engaging real customers"},
+                                    {"begin lean start up with a minimal viable product": "the simplest version of a product or service with which an entrepreneur can create a sustainable business"}
+                                ]
+                            },
+                            {
+                                "Pivot business model until ready to expand": [
+                                    "Product Pivot",
+                                    "Customer Pivot",
+                                    "Revenue Model Pivot"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "Business plan": {
+                        "A written summary of": [
+                            "An entrepreneur’s proposed business venture",
+                            "The operational and financial details",
+                            "The marketing opportunities and strategy",
+                            "The managers’ skills and abilities"
+                        ],
+                        "Functions": [
+                            "Guiding the company by charting its future course and defining its strategy for following it.",
+                            "Attracting lenders and investors who will provide needed capital."
+                        ],
+                        "Tests": [
+                            {
+                                "Reality test": [
+                                    "A market really does exist for your product or service.",
+                                    "You can actually build or provide it for the cost estimates in the plan."
+                                ]
+                            },
+                            {
+                                "Competitive test": [
+                                    "A company’s position relative to its competitors.",
+                                    "Management’s ability to create a company that will gain an edge over its rivals."
+                                ]
+                            },
+                            {
+                                "Value test": [
+                                    "A venture offers investors or lenders an attractive rate of return or a high probability of repayment."
+                                ]
+                            }
+                        ],
+                        "Elements": [
+                            "Title Page and Table of Contents",
+                            {
+                                "Executive Summary": {
+                                    "good elevator pitch": [
+                                        "context",
+                                        "benefit",
+                                        "target customers",
+                                        "point of differentiation",
+                                        "clincher"
+                                    ]
+                                }
+                            },
+                            "Mission and Vision Statement",
+                            {
+                                "Description of a Firm’s Product or Service": [
+                                    {"Feature": "a descriptive fact about a product or service"},
+                                    {"Benefit": "what the customer gains from the product or service feature"},
+                                ]
+                            },
+                            "Business and Industry Profile",
+                            {
+                                "Competitor Analysis": [
+                                    "Who are the company’s key competitors?",
+                                    "What are there strengths and weaknesses?",
+                                    "What are their strategies?",
+                                    "How successful are they?",
+                                    "What distinguishes the entrepreneur’s product or service from others already in the market, and how will these differences produce a competitive edge? "
+                                ]
+                            },
+                            "Market Entry Strategy",
+                            {
+                                "Marketing Strategy": [
+                                    {"Show customer interest": "Prove that target customers actually need or want the product or service"},
+                                    {
+                                        "Document market claims": {
+                                            "goal": "Support market size and growth rates with facts",
+                                            "address": [
+                                                "Target market",
+                                                "Advertising and promotion",
+                                                "Market size and trends",
+                                                "Location",
+                                                "Pricing",
+                                                "Distribution"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "Entrepreneurs’ and Managers’ Resumes",
+                            "Plan of Operation",
+                            "Pro Forma (Projected) Financial Statements",
+                            "The Loan or Investment Proposal "
+                        ],
+                        "Tips": [
+                            "First impressions count! Use an attractive cover.",
+                            "Checks for errors.",
+                            "Make it visually appealing.",
+                            "Include a table of contents with page numbers.",
+                            "Make it interesting!",
+                            "Show that it will make money.",
+                            "Use spreadsheets for realistic financial forecasts.",
+                            "Include cash flow projections.",
+                            "Keep the plan “crisp.”",
+                            "Tell the truth."
+                        ],
+                        "Investors look for": [
+                            "Capital",
+                            "Capacity",
+                            "Collateral",
+                            "Character",
+                            "Conditions"
+                        ],
+                        "Pitch": {
+                            "Should cover": [
+                                "Your company and its products and services.",
+                                "The problem to be solved.",
+                                "A description of your solution to the problem.",
+                                "Your company’s business model.",
+                                "Your company’s competitive edge. "
+                            ],
+                            "Tips": [
+                                "Prepare",
+                                "Practice your delivery and then practice some more.",
+                                "Demonstrate enthusiasm about the business but don’t be overly emotional.",
+                                "Focus on communicating the dynamic opportunity your idea offers and how you plan to capitalize on it.",
+                                "Hook investors quickly with an up-front explanation of the new venture, its opportunities, and the anticipated benefits to them.",
+                                "Use visual aids.",
+                                "Follow the 10/20/30 rule for PowerPoint presentations.",
+                                "Explain how your company’s products or services solve some problems and emphasize the factors that make your company unique.",
+                                "Offer proof.",
+                                "Hit the highlights.",
+                                "Keep the presentation “crisp.”",
+                                "Avoid the use of technical terms that will be above most of the audience.",
+                                "Remember to tell lenders and investors how they will benefit.",
+                                "Be prepared for questions.",
+                                "Anticipate questions and prepare for them in advance.",
+                                "Focus your answers on what’s important to lenders and investors.",
+                                "Follow up with every lender and investor to whom you make a presentation."
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Strategic plan": {
+                        "competitive advantage": {
+                            "definition": "the aggregation of factors that sets a company apart from its competitors and gives it a unique position in the market that is superior to its competitors",
+                            "aspects": [
+                                "Products they sell",
+                                "Service they provide",
+                                "Pricing they offer",
+                                "Way they sell",
+                                "Values to which they are committed"
+                            ],
+                        },
+                        "core competencies": "Unique set of capabilities a company develops in key areas, such as superior quality, customer service, innovation, team-building, flexibility, responsiveness, and others that allow it to vault past competitors",
+                        "Steps": [
+                            {
+                                "Develop a vision and translate it into a mission statement": {
+                                    "Vision": {
+                                        "Definition": "the result of an entrepreneur’s dream of something that does not exist yet and the ability to paint a compelling picture of that dream for everyone to see",
+                                        "Benefits": [
+                                            "Provides direction",
+                                            "Determines decisions",
+                                            "Inspires people",
+                                            "Allows for perseverance in the face of adversity"
+                                        ]
+                                    },
+                                    "Mission statement": [
+                                        "What are we in business to accomplish?",
+                                        "Who are we in business to serve?",
+                                        "How are we going to accomplish that purpose?",
+                                        "What principles and beliefs form the foundation of the way we do business?"
+                                    ]
+                                }
+                            },
+                            {
+                                "Assess strengths and weaknesses": {
+                                    "Strengths": "Positive internal factors a company can draw on to accomplish its mission, goals, and objectives.",
+                                    "Weaknesses": "Negative internal factors that inhibit a company’s ability to accomplish its mission, goals, and objectives."
+                                }
+                            },
+                            {
+                                "Scan environment for opportunities and threats": {
+                                    "Opportunities": "Positive external factors the company can exploit to accomplish its mission, goals, and objectives.",
+                                    "Threats": "Negative external factors that inhibit the firm's ability to accomplish its mission, goals, and objectives."
+                                }
+                            },
+                            {
+                                "Identify key success factors (KSFs)": "factors that determine the relative success of market participants."
+                            },
+                            {
+                                "Analyze competition": {
+                                    "Goal of competitve intelligence": [
+                                        "Conduct continuous rather than periodic analysis of competition.",
+                                        "Avoid surprises from existing competitors’ use of new strategies and tactics.",
+                                        "Identify potential new competitors.",
+                                        "Improve reaction time to competitors’ actions.",
+                                        "Anticipate rivals’ next strategic moves."
+                                    ],
+                                    "Competitive intelligence methods": [
+                                        "Monitor industry and trade publications.",
+                                        "Talk to customers and suppliers.",
+                                        "Debrief employees, especially sales representatives and purchasing agents.",
+                                        "Attend trade shows and conferences and study competitors’ sales literature.",
+                                        "Watch for competitor’s employment ads.• Watch for competitor’s employment ads.",
+                                        "Conduct patent searches for patents competitors have filed.",
+                                        "Get environmental protection agency (EPA) reports for the factories of competing manufacturers.",
+                                        "Monitor direct competitors via social media.",
+                                        "Learn about the kinds of equipment and raw materials competitors are importing from the Journal of Commerce Port Import Export Reporting Service.",
+                                        "Buy competitors’ products and “benchmark” them.",
+                                        "Get competitors’ credit reports.",
+                                        "Check out the reports publicly-held competitors must file with the SEC.",
+                                        "Check out the resources in your local library.",
+                                        "Use the Internet to learn more about competitors.",
+                                        "Visit competing businesses to observe their operations."
+                                    ]
+                                }
+                            },
+                            {
+                                "Create goals & objectives": {
+                                    "Goals": "Broad, long-range attributes to be accomplished - BHAG (Big Hairy Audacious Goals)",
+                                    "What makes an effective BHAG": [
+                                        "Mission, Vision and Values",
+                                        "Key Success Factors",
+                                        "Distinctive Competencies"
+                                    ]
+                                }
+                            },
+                            {
+                                "Formulate strategies": {
+                                    "Strategy": "a road map of the actions an entrepreneur draws up to achieve a company’s mission, goals, and objectives",
+                                    "Porter's Three Strategies": [
+                                        {
+                                            "Cost Leadership": {
+                                                "Goal": "Be the low-cost producer in the industry or market segment.",
+                                                "Advantage": [
+                                                    "Reaching buyers who buy on the basis of price.",
+                                                    "The power to set the industry’s price floor."
+                                                ],
+                                                "Works well when": [
+                                                    "Buyers are sensitive to price changes.",
+                                                    "Competing firms sell the same commodity products.",
+                                                    "A company can benefit from economies of scale."
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "Differentiation": {
+                                                "Goal": "Build customer loyalty by positioning its goods or services in a unique or different fashion",
+                                                "Key": "Build basis for differentiation on a distinctive competence, something that the small company is uniquely good at doing in comparison to its competitors"
+                                            }
+                                        },
+                                        {
+                                            "Focus": {
+                                                "Goal": "Select one or more customer segments in a market, identify customers’ special needs, wants, or interests, and then target them with a product or service designed specifically for them",
+                                                "Key": [
+                                                    "Strategy builds on the differences among market segments.",
+                                                    "Rather than try to serve the total market, the company focuses on serving a niche (or several niches) within that market."
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Translate plans into actions": [
+                                    "Purpose",
+                                    "Scope",
+                                    "Contribution",
+                                    "Resource requirements",
+                                    "Timing"
+                                ]
+                            },
+                            {
+                                "Establish accurate controls": [
+                                    "Identify and track key performance indicators.",
+                                    "Take corrective action."
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "Launching the business"
+            ]
+        }
+            ;
+
+        /**
+         * Helper function to handle the expand/collapse logic
+         * It includes the "reset" feature for descendants.
+         */
+        function toggleNode(e, toggleElement, childrenContainer) {
+            e.stopPropagation(); // Prevent triggering parent clicks
+
+            const isExpanded = childrenContainer.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Collapse the current node
+                childrenContainer.classList.remove('expanded');
+                toggleElement.classList.remove('open');
+
+                // FEATURE 1: Find all open descendants and collapse them too
+                const expandedDescendants = childrenContainer.querySelectorAll('.expanded');
+                const openToggles = childrenContainer.querySelectorAll('.open');
+
+                expandedDescendants.forEach(el => el.classList.remove('expanded'));
+                openToggles.forEach(el => el.classList.remove('open'));
+            } else {
+                // Expand the current node
+                childrenContainer.classList.add('expanded');
+                toggleElement.classList.add('open');
+            }
+        }
+
+        /**
+         * Recursively builds the DOM tree for the JSON.
+         * @param {string|number} key - The current key or array index
+         * @param {any} value - The value associated with the key
+         * @param {boolean} isArrayIndex - Tells us if the current item is a direct child of an array
+         */
+        function renderNode(key, value, isArrayIndex) {
+            const container = document.createElement('div');
+
+            if (typeof value === 'object' && value !== null) {
+                // -- HANDLE OBJECTS & ARRAYS --
+                if (isArrayIndex) {
+                    // Skip rendering the array index and directly render the object's keys
+                    for (let k in value) {
+                        container.appendChild(renderNode(k, value[k], Array.isArray(value)));
+                    }
+                } else {
+                    // Render a standard expandable Key
+                    const toggle = document.createElement('div');
+                    toggle.className = 'expandable';
+                    toggle.textContent = key;
+
+                    const children = document.createElement('div');
+                    children.className = 'children';
+
+                    // Populate children recursively
+                    for (let k in value) {
+                        children.appendChild(renderNode(k, value[k], Array.isArray(value)));
+                    }
+
+                    // Attach click event for recursive collapse/expand
+                    toggle.onclick = (e) => toggleNode(e, toggle, children);
+
+                    container.appendChild(toggle);
+                    container.appendChild(children);
+                }
+            } else {
+                // -- HANDLE PRIMITIVE VALUES (Strings, Numbers, etc.) --
+                if (isArrayIndex) {
+                    // FEATURE 2: Raw array values get the leaf class (which adds the bullet via CSS)
+                    container.className = 'leaf';
+                    container.textContent = value;
+                } else {
+                    // Key-value pairs. Key is expandable, Value is the child.
+                    const toggle = document.createElement('div');
+                    toggle.className = 'expandable';
+                    toggle.textContent = key;
+
+                    const children = document.createElement('div');
+                    children.className = 'children';
+
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf';
+                    leaf.textContent = value;
+
+                    children.appendChild(leaf);
+
+                    // Attach click event for recursive collapse/expand
+                    toggle.onclick = (e) => toggleNode(e, toggle, children);
+
+                    container.appendChild(toggle);
+                    container.appendChild(children);
+                }
+            }
+
+            return container;
+        }
+
+        // Initialize the viewer
+        const viewer = document.getElementById('json-viewer');
+        for (let key in jsonData) {
+            // Render root keys (e.g., "array")
+            viewer.appendChild(renderNode(key, jsonData[key], false));
+        }
+    </script>
+
+</body>
+
+</html>
